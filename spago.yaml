@@ -1,0 +1,20 @@
+workspace:
+  packageSet:
+    registry: 51.0.0
+  extraPackages:
+    var:
+      path: ../purescript-var
+
+package:
+  name: websocket-simple
+  dependencies:
+    - effect
+    - nullable
+    - prelude
+    - unsafe-coerce
+    - var
+    - web-socket
+  test:
+    main: Test.Main
+    dependencies:
+      - console

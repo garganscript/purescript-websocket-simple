@@ -3,11 +3,11 @@
 
 // module WebSocket
 
-exports.specViolation = function(s) {
+export function specViolation(s) {
   throw new Error(s);
 }
 
-exports.newWebSocketImpl = function(url, protocols) {
+export function newWebSocketImpl(url, protocols) {
   return function() {
     var platformSpecific = {};
     if (typeof module !== "undefined" && module.require) {
