@@ -5,6 +5,7 @@ workspace:
       dependencies:
         - effect
         - nullable
+        - partial
         - prelude
         - unsafe-coerce
         - var
@@ -558,7 +559,8 @@ workspace:
       zipperarray: 2.0.0
   extra_packages:
     var:
-      path: ../purescript-var
+      git: git@github.com:garganscript/purescript-var.git
+      ref: v3.0.1-spago-next
 packages:
   arraybuffer-types:
     type: registry
@@ -1020,8 +1022,9 @@ packages:
     integrity: sha256-IqIYW4Vkevn8sI+6aUwRGvd87tVL36BBeOr0cGAE7t0=
     dependencies: []
   var:
-    type: local
-    path: ../purescript-var
+    type: git
+    url: git@github.com:garganscript/purescript-var.git
+    rev: b1f20a9a80ba2e7cedeb64a20e4c1cf566ab6b7b
     dependencies:
       - contravariant
       - effect

@@ -3,13 +3,15 @@ workspace:
     registry: 51.0.0
   extraPackages:
     var:
-      path: ../purescript-var
+      git: git@github.com:garganscript/purescript-var.git
+      ref: v3.0.1-spago-next
 
 package:
   name: websocket-simple
   dependencies:
     - effect
     - nullable
+    - partial
     - prelude
     - unsafe-coerce
     - var

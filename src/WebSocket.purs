@@ -26,21 +26,21 @@ import Data.Eq.Generic (genericEq)
 import Data.Function.Uncurried (runFn2, Fn2)
 import Data.Functor.Invariant (imap)
 import Data.Generic.Rep (class Generic)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromJust)
 import Data.Nullable (toNullable, Nullable)
 import Data.Ord.Generic (genericCompare)
 import Data.Show.Generic (genericShow)
 import Effect (Effect)
+import Effect.Exception (throw)
 import Effect.Var (Var, GettableVar, SettableVar, makeVar, makeGettableVar, makeSettableVar)
 import Foreign (unsafeFromForeign)
-import Prelude (class Ord, compare, class Eq, eq, class Bounded, class Show, Unit, (<$>), (>>>), (>>=), ($))
+import Partial.Unsafe (unsafePartial)
+import Prelude (class Ord, compare, class Eq, eq, class Bounded, class Show, show, Unit, (<$>), (>>>), (>>=), ($), (<>), pure)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.EventTarget (eventListener, EventListener)
 import Web.Event.Internal.Types (Event)
 import Web.Socket.Event.CloseEvent (CloseEvent)
 import Web.Socket.Event.MessageEvent (data_, MessageEvent)
-
-foreign import specViolation :: forall a. String -> a
 
 -- | A reference to a WebSocket object.
 foreign import data WebSocket :: Type
@@ -50,8 +50,8 @@ newWebSocket :: URL -> Array Protocol -> Effect Connection
 newWebSocket url protocols = enhanceConnection <$> runFn2 newWebSocketImpl url protocols
 
 foreign import newWebSocketImpl :: Fn2 URL
-                                                   (Array Protocol)
-                                                   (Effect ConnectionImpl)
+                                       (Array Protocol)
+                                       (Effect ConnectionImpl)
 
 runMessageEvent :: MessageEvent -> Message
 runMessageEvent event = unsafeFromForeign $ data_ event
@@ -78,7 +78,8 @@ coerceEvent = unsafeCoerce
 
 enhanceConnection :: ConnectionImpl -> Connection
 enhanceConnection c = Connection $
-  { binaryType: imap toBinaryType fromBinaryType $ makeVar c.getBinaryType c.setBinaryType
+  -- We can use 'unsafePartial' here as WebSocket spec isn't likely to change much
+  { binaryType: imap (unsafePartial toBinaryType) fromBinaryType $ makeVar c.getBinaryType c.setBinaryType
   , bufferedAmount: makeGettableVar c.getBufferedAmount
   , onclose: makeSettableVar \f -> eventListener (coerceEvent >>> f) >>= c.setOnclose
   , onerror: makeSettableVar \f -> eventListener (coerceEvent >>> f) >>= c.setOnerror
@@ -95,8 +96,8 @@ enhanceConnection c = Connection $
   where
     unsafeReadyState :: Int -> ReadyState
     unsafeReadyState x =
-      fromMaybe (specViolation "readyState isn't in the range of valid constants")
-                (toEnum x)
+      -- We can use 'unsafePartial' here as WebSocket spec isn't likely to change much
+      unsafePartial (fromJust $ toEnum x)
 
 
 -- | - `binaryType` -- The type of binary data being transmitted by the connection.
@@ -141,10 +142,10 @@ newtype Connection = Connection
 -- | The type of binary data being transmitted by the connection.
 data BinaryType = Blob | ArrayBuffer
 
-toBinaryType :: String -> BinaryType
+toBinaryType :: Partial => String -> BinaryType
 toBinaryType "blob" = Blob
 toBinaryType "arraybuffer" = ArrayBuffer
-toBinaryType s = specViolation "binaryType should be either 'blob' or 'arraybuffer'"
+-- toBinaryType s = Nothing -- Left "binaryType should be either 'blob' or 'arraybuffer'"
 
 fromBinaryType :: BinaryType -> String
 fromBinaryType Blob = "blob"
