@@ -559,7 +559,7 @@ workspace:
       zipperarray: 2.0.0
   extra_packages:
     var:
-      git: git@github.com:garganscript/purescript-var.git
+      git: https://github.com/garganscript/purescript-var.git
       ref: v3.0.1-spago-next
 packages:
   arraybuffer-types:
@@ -1023,7 +1023,7 @@ packages:
     dependencies: []
   var:
     type: git
-    url: git@github.com:garganscript/purescript-var.git
+    url: https://github.com/garganscript/purescript-var.git
     rev: b1f20a9a80ba2e7cedeb64a20e4c1cf566ab6b7b
     dependencies:
       - contravariant
